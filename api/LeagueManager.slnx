@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LeagueManager.Api/LeagueManager.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LeagueManager.Api.IntegrationTests/LeagueManager.Api.IntegrationTests.csproj" />
+    <Project Path="tests/LeagueManager.Api.TestData/LeagueManager.Api.TestData.csproj" />
+    <Project Path="tests/LeagueManager.Api.UnitTests/LeagueManager.Api.UnitTests.csproj" />
+  </Folder>
+</Solution>
