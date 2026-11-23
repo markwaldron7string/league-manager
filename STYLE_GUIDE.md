@@ -38,10 +38,15 @@ league-manager/
 
 ### How I use AI
 
-- **I write the code.** AI can explain concepts, answer questions, review my code, and help me find a bug by pointing to where the problem is.
-- AI does not write feature code for me to paste in.
-- If I do use AI for setup or config files, I don't commit them until I can explain every line.
-- Any AI tool opened in this repo should follow these rules.
+- AI tools (Copilot, Claude) can explain concepts, suggest code, review my code, and help me debug.
+
+- I only commit code I can explain line by line. If I can't explain a line, I look it up or ask until I can, or I don't commit it.
+
+- I make the design decisions: what the classes are, where the rules live, what gets tested.
+
+- Business rules are test-first, and I write those tests myself. The tests are where I prove I understand what the code should do.
+
+- In interviews, I'm open about using AI tools, the same way I'd  mention any other tool.
 
 ### Git
 
