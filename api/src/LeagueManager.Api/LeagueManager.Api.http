@@ -1,6 +1,33 @@
-@LeagueManager.Api_HostAddress = http://localhost:5179
+@hostAddress = http://localhost:5179
 
-GET {{LeagueManager.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Create a league (expect 201)
+POST {{hostAddress}}/api/v1/leagues
+Content-Type: application/json
 
-###
+{
+  "name": "Portage Lakes Baseball"
+}
+
+### Same name again, different case (expect 409)
+POST {{hostAddress}}/api/v1/leagues
+Content-Type: application/json
+
+{
+  "name": "stark county youth soccer"
+}
+
+### Blank name (expect 400)
+POST {{hostAddress}}/api/v1/leagues
+Content-Type: application/json
+
+{
+  "name": "   "
+}
+
+### Name over 100 characters (expect 400)
+POST {{hostAddress}}/api/v1/leagues
+Content-Type: application/json
+
+{
+  "name": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+}
