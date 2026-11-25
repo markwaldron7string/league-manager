@@ -1,6 +1,6 @@
 # League Manager Style Guide
 
-Version 1.1. "League Manager" is a placeholder name until the project has a real one.
+Version 1.2. "League Manager" is a placeholder name until the project has a real one.
 
 ## 1. About this guide
 
@@ -21,6 +21,7 @@ league-manager/
       Data/                     DbContext, entity configs, migrations
       Models/                   Entities (match database tables)
       Dtos/                     Request and response shapes
+      Exceptions/               Custom exceptions and the global exception handler
     tests/
       LeagueManager.Api.UnitTests/
       LeagueManager.Api.IntegrationTests/
@@ -39,14 +40,10 @@ league-manager/
 ### How I use AI
 
 - AI tools (Copilot, Claude) can explain concepts, suggest code, review my code, and help me debug.
-
-- I only commit code I can explain line by line. If I can't explain a line, I look it up or ask until I can, or I don't commit it.
-
-- I make the design decisions: what the classes are, where the rules live, what gets tested.
-
-- Business rules are test-first, and I write those tests myself. The tests are where I prove I understand what the code should do.
-
-- In interviews, I'm open about using AI tools, the same way I'd  mention any other tool.
+- **I only commit code I can explain line by line.** If I can't explain a line, I look it up or ask until I can, or I don't commit it.
+- **I make the design decisions**: what the classes are, where the rules live, what gets tested.
+- **Business rules are test-first, and I write those tests myself.** The tests are where I prove I understand what the code should do.
+- In interviews, I'm open about using AI tools, the same way I'd mention any other tool.
 
 ### Git
 

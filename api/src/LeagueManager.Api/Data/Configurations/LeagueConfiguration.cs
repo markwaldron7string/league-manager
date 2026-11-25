@@ -10,7 +10,7 @@ public class LeagueConfiguration : IEntityTypeConfiguration<League>
     {
         builder.Property(league => league.Name)
             .HasMaxLength(100);
-        
+
         builder.HasIndex(league => league.Name)
             .IsUnique();
     }
