@@ -1,4 +1,6 @@
 using LeagueManager.Api.Data;
+using LeagueManager.Api.Services;
+using LeagueManager.Api.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +17,13 @@ var connectionString = builder.Configuration.GetConnectionString("LeagueManager"
 builder.Services.AddDbContext<LeagueManagerDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<ILeagueService, LeagueService>();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
