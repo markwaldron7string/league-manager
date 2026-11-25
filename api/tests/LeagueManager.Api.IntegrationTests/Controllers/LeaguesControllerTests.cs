@@ -41,6 +41,33 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
     }
 
     [Fact]
+    public async Task CreateLeague_ValidName_ReturnsLocationOfNewLeague()
+    {
+        // Arrange
+        var request = new CreateLeagueRequest("Location League");
+
+        // Act
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/leagues", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        var createdLeague = await createResponse.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(createdLeague);
+
+        var location = createResponse.Headers.Location;
+        Assert.NotNull(location);
+
+        var getResponse = await _client.GetAsync(location);
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var league = await getResponse.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(league);
+        Assert.Equal(createdLeague.Id, league.Id);
+        Assert.Equal(createdLeague.Name, league.Name);
+    }
+
+    [Fact]
     public async Task CreateLeague_ValidName_SetsTimestampsFromClock()
     {
         // Arrange
