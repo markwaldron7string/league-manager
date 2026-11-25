@@ -29,6 +29,12 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Title = "Conflict",
                 Detail = conflict.Message,
             },
+            NotFoundException notFound => new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Not Found",
+                Detail = notFound.Message,
+            },
             _ => new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,
