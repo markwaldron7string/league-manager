@@ -41,6 +41,33 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
     }
 
     [Fact]
+    public async Task CreateLeague_ValidName_ReturnsLocationOfNewLeague()
+    {
+        // Arrange
+        var request = new CreateLeagueRequest("Location League");
+
+        // Act
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/leagues", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        var createdLeague = await createResponse.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(createdLeague);
+
+        var location = createResponse.Headers.Location;
+        Assert.NotNull(location);
+
+        var getResponse = await _client.GetAsync(location);
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var league = await getResponse.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(league);
+        Assert.Equal(createdLeague.Id, league.Id);
+        Assert.Equal(createdLeague.Name, league.Name);
+    }
+
+    [Fact]
     public async Task CreateLeague_ValidName_SetsTimestampsFromClock()
     {
         // Arrange
@@ -117,5 +144,45 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetLeagueById_ExistingId_Returns200WithLeague()
+    {
+        // Arrange
+        var request = new CreateLeagueRequest("Test League");
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/leagues", request);
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        var createdLeague = await createResponse.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(createdLeague);
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/leagues/{createdLeague.Id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var league = await response.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(league);
+        Assert.Equal(createdLeague.Id, league.Id);
+        Assert.Equal(request.Name, league.Name);
+    }
+
+    [Fact]
+    public async Task GetLeagueById_MissingId_Returns404()
+    {
+        // Arrange
+        var missingId = 99999;
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/leagues/{missingId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal($"League {missingId} was not found.", problem.Detail);
     }
 }

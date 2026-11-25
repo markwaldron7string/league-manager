@@ -53,4 +53,14 @@ public class LeagueService : ILeagueService
 
         return new LeagueResponse(league.Id, league.Name);
     }
+
+    public async Task<LeagueResponse> GetLeagueByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var league = await _db.Leagues
+            .AsNoTracking()
+            .FirstOrDefaultAsync(league => league.Id == id, cancellationToken)
+            ?? throw new NotFoundException($"League {id} was not found.");
+
+        return new LeagueResponse(league.Id, league.Name);
+    }
 }

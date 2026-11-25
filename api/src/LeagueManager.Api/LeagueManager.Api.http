@@ -8,6 +8,14 @@ Content-Type: application/json
   "name": "Portage Lakes Baseball"
 }
 
+### Create a new league and check the location header (change the name each time)
+POST {{hostAddress}}/api/v1/leagues
+Content-Type: application/json
+
+{
+  "name": "Location Check League 2"
+}
+
 ### Same name again, different case (expect 409)
 POST {{hostAddress}}/api/v1/leagues
 Content-Type: application/json
@@ -31,3 +39,18 @@ Content-Type: application/json
 {
   "name": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 }
+
+###
+
+# Get a league that exists
+GET {{hostAddress}}/api/v1/leagues/5
+
+###
+
+# Get a league that doesn't exist
+GET {{hostAddress}}/api/v1/leagues/99999
+
+###
+
+# Id that isn't a number
+GET {{hostAddress}}/api/v1/leagues/abc

@@ -15,6 +15,17 @@ public class LeaguesController : ControllerBase
         _leagueService = leagueService;
     }
 
+    [HttpGet("{id:int}")]
+    [ProducesResponseType<LeagueResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LeagueResponse>> GetLeagueById(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var league = await _leagueService.GetLeagueByIdAsync(id, cancellationToken);
+        return Ok(league);
+    }
+
     [HttpPost]
     [ProducesResponseType<LeagueResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -25,6 +36,6 @@ public class LeaguesController : ControllerBase
     {
         var league = await _leagueService.CreateLeagueAsync(request, cancellationToken);
 
-        return Created($"/api/v1/leagues/{league.Id}", league);
+        return CreatedAtAction(nameof(GetLeagueById), new { id = league.Id }, league);
     }
 }
