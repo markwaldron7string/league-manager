@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using LeagueManager.Api.Data;
 using LeagueManager.Api.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LeagueManager.Api.IntegrationTests.Controllers;
 
@@ -36,6 +38,32 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         Assert.NotNull(league);
         Assert.InRange(league.Id, 1, int.MaxValue);
         Assert.Equal(request.Name, league.Name);
+    }
+
+    [Fact]
+    public async Task CreateLeague_ValidName_SetsTimestampsFromClock()
+    {
+        // Arrange
+        var expectedTime = new DateTimeOffset(2026, 3, 1, 14, 30, 0, TimeSpan.Zero);
+        _factory.Clock.SetUtcNow(expectedTime);
+        var request = new CreateLeagueRequest("Timestamp League");
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/leagues", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var league = await response.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(league);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LeagueManagerDbContext>();
+        var savedLeague = await dbContext.Leagues.FindAsync(league.Id);
+
+        Assert.NotNull(savedLeague);
+        Assert.Equal(expectedTime.UtcDateTime, savedLeague.CreatedAt);
+        Assert.Equal(expectedTime.UtcDateTime, savedLeague.UpdatedAt);
     }
 
     [Fact]

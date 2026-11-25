@@ -1,9 +1,12 @@
 using LeagueManager.Api.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Time.Testing;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.MsSql;
@@ -16,12 +19,20 @@ public class LeagueManagerApiFactory : WebApplicationFactory<Program>, IAsyncLif
     private readonly MsSqlContainer _sqlContainer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest").Build();
 
+    public FakeTimeProvider Clock { get; } = new();
+
     private Respawner? _respawner;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:LeagueManager", _sqlContainer.GetConnectionString());
+
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<TimeProvider>();
+            services.AddSingleton<TimeProvider>(Clock);
+        });
     }
 
     public async Task InitializeAsync()
