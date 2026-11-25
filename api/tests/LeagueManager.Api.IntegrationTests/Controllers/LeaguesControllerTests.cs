@@ -4,14 +4,20 @@ using LeagueManager.Api.Dtos;
 
 namespace LeagueManager.Api.IntegrationTests.Controllers;
 
-public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>
+public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IAsyncLifetime
 {
+    private readonly LeagueManagerApiFactory _factory;
     private readonly HttpClient _client;
 
     public LeaguesControllerTests(LeagueManagerApiFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
+
+    public Task InitializeAsync() => _factory.ResetDatabaseAsync();
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task CreateLeague_ValidName_Returns201WithLeague()

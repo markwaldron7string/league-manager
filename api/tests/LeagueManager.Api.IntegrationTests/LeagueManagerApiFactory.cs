@@ -1,8 +1,11 @@
 using LeagueManager.Api.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Respawn;
+using Respawn.Graph;
 using Testcontainers.MsSql;
 using Xunit;
 
@@ -12,6 +15,8 @@ public class LeagueManagerApiFactory : WebApplicationFactory<Program>, IAsyncLif
 {
     private readonly MsSqlContainer _sqlContainer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest").Build();
+
+    private Respawner? _respawner;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -26,6 +31,28 @@ public class LeagueManagerApiFactory : WebApplicationFactory<Program>, IAsyncLif
         using var scope = Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<LeagueManagerDbContext>();
         await dbContext.Database.MigrateAsync();
+
+        await using var connection = new SqlConnection(_sqlContainer.GetConnectionString());
+        await connection.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(
+            connection,
+            new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.SqlServer,
+                TablesToIgnore = [new Table("__EFMigrationsHistory")],
+            });
+    }
+
+    public async Task ResetDatabaseAsync()
+    {
+        var respawner = _respawner
+            ?? throw new InvalidOperationException("ResetDatabaseAsync was called before InitializeAsync.");
+
+        await using var connection = new SqlConnection(_sqlContainer.GetConnectionString());
+        await connection.OpenAsync();
+
+        await respawner.ResetAsync(connection);
     }
 
     async Task IAsyncLifetime.DisposeAsync()
