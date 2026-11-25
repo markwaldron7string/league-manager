@@ -71,4 +71,23 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         Assert.NotNull(problem);
         Assert.Contains("Name", problem.Errors.Keys);
     }
+
+    [Theory]
+    [InlineData("Test League")]
+    [InlineData("test league")]
+    public async Task CreateLeague_DuplicateName_Returns409(string duplicateName)
+    {
+        // Arrange
+        var originalRequest = new CreateLeagueRequest("Test League");
+        var originalResponse = await _client.PostAsJsonAsync("/api/v1/leagues", originalRequest);
+        Assert.Equal(HttpStatusCode.Created, originalResponse.StatusCode);
+
+        var duplicateRequest = new CreateLeagueRequest(duplicateName);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/leagues", duplicateRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
 }
