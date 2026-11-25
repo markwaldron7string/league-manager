@@ -54,4 +54,21 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         Assert.NotNull(problem);
         Assert.Contains("Name", problem.Errors.Keys);
     }
+
+    [Fact]
+    public async Task CreateLeague_NameTooLong_Returns400()
+    {
+        // Arrange
+        var request = new CreateLeagueRequest(new string('a', 101));
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/leagues", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Contains("Name", problem.Errors.Keys);
+    }
 }
