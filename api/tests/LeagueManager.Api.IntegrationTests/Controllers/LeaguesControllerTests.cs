@@ -118,4 +118,27 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetLeagueById_ExistingId_Returns200WithLeague()
+    {
+        // Arrange
+        var request = new CreateLeagueRequest("Test League");
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/leagues", request);
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        var createdLeague = await createResponse.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(createdLeague);
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/leagues/{createdLeague.Id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var league = await response.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(league);
+        Assert.Equal(createdLeague.Id, league.Id);
+        Assert.Equal(request.Name, league.Name);
+    }
 }
