@@ -141,4 +141,21 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         Assert.Equal(createdLeague.Id, league.Id);
         Assert.Equal(request.Name, league.Name);
     }
+
+    [Fact]
+    public async Task GetLeagueById_MissingId_Returns404()
+    {
+        // Arrange
+        var missingId = 99999;
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/leagues/{missingId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal($"League {missingId} was not found.", problem.Detail);
+    }
 }
