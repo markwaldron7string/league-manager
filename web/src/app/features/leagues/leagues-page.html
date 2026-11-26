@@ -5,11 +5,11 @@
   <input id="league-name" type="text" formControlName="name" />
   @if (form.controls.name.touched && form.controls.name.errors; as errors) {
     <p>
-        @if (errors['blank']) {
-            League name is required
-        } @else if (errors['maxLength']) {
-            League name must be 100 characters or fewer.
-        }
+      @if (errors['blank']) {
+        League name is required.
+      } @else if (errors['maxlength']) {
+        League name must be 100 characters or fewer.
+      }
     </p>
   }
   <button type="submit">Create</button>
