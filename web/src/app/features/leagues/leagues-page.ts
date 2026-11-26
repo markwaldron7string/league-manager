@@ -34,6 +34,8 @@ export class LeaguesPage implements OnInit {
 
   protected readonly createError = signal<string | undefined>(undefined);
 
+  protected readonly loadError = signal<string | undefined>(undefined);
+
   protected readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
@@ -66,6 +68,14 @@ export class LeaguesPage implements OnInit {
   }
 
   private loadLeagues(): void {
-    this.leagueApi.getLeagues().subscribe((leagues) => this.leagues.set(leagues));
+    this.leagueApi.getLeagues().subscribe({
+      next: (leagues) => {
+        this.loadError.set(undefined);
+        this.leagues.set(leagues);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.loadError.set(problemDetail(error) ?? 'The leagues could not be loaded.');
+      },
+    });
   }
 }

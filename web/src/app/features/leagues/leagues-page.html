@@ -18,6 +18,10 @@
   }
 </form>
 
+@if (loadError(); as message) {
+    <p role="alert">{{ message }}</p>
+}
+
 @if (leagues(); as leagueList) {
   @if (leagueList.length === 0) {
     <p>No leagues yet.</p>
