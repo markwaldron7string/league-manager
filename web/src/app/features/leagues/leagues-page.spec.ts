@@ -114,7 +114,7 @@ describe('LeaguesPage', () => {
     expect(nameField.value).toBe('');
   });
 
-    it.each([
+  it.each([
     { name: '', message: 'League name is required.' },
     { name: '   ', message: 'League name is required.' },
     { name: 'a'.repeat(101), message: 'League name must be 100 characters or fewer.' },
@@ -140,7 +140,7 @@ describe('LeaguesPage', () => {
     expect(createLeague).not.toHaveBeenCalled();
   });
 
-    it('shows the error message from the API when the name is already taken', async () => {
+  it('shows the error message from the API when the name is already taken', async () => {
     // Arrange
     const detail = 'A league named "Cedar League" already exists.';
     const createLeague = vi.fn().mockReturnValue(
@@ -174,5 +174,21 @@ describe('LeaguesPage', () => {
     const alert = page.querySelector('[role="alert"]');
     expect(alert?.textContent?.trim()).toBe(detail);
     expect(nameField.value).toBe('Cedar League');
+  });
+
+  it('shows an error message when the leagues cannot load', async () => {
+    // Arrange
+    const getLeagues = () =>
+      throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }));
+
+    // Act
+    const fixture = await renderPage({ getLeagues });
+
+    // Assert
+    const page: HTMLElement = fixture.nativeElement;
+    const alert = page.querySelector('[role="alert"]');
+    expect(alert?.textContent?.trim()).toBe('The leagues could not be loaded.');
+    expect(page.textContent).not.toContain('No leagues yet.');
+    expect(page.querySelector('ul')).toBeNull();
   });
 });
