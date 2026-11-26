@@ -1,8 +1,19 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 
-import { League } from './league';
+import { CreateLeagueRequest, League } from './league';
 import { LeagueApi } from './league-api';
+
+function notBlank(control: AbstractControl<string>): ValidationErrors | null {
+  return control.value.trim().length === 0 ? { blank: true } : null;
+}
 
 @Component({
   selector: 'app-leagues-page',
@@ -16,11 +27,27 @@ export class LeaguesPage implements OnInit {
   protected readonly leagues = signal<League[] | undefined>(undefined);
 
   protected readonly form = new FormGroup({
-    name: new FormControl('', { nonNullable: true }),
+    name: new FormControl('', { 
+      nonNullable: true,
+      validators: [notBlank, Validators.maxLength(100)],
+    }),
   });
 
   ngOnInit(): void {
     this.loadLeagues();
+  }
+
+  protected createLeague(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const request: CreateLeagueRequest = this.form.getRawValue();
+
+    this.leagueApi.createLeague(request).subscribe(() => {
+      this.form.reset();
+      this.loadLeagues();
+    });
   }
 
   private loadLeagues(): void {
