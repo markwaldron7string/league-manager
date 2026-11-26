@@ -21,3 +21,22 @@ jobs:
       - run: dotnet build --no-restore
       - run: dotnet format --verify-no-changes --no-restore
       - run: dotnet test --no-build
+      
+  web-build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm test -- --watch=false
