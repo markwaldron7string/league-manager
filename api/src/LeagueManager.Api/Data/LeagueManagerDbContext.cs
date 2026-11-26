@@ -12,6 +12,8 @@ public class LeagueManagerDbContext : DbContext
 
     public DbSet<League> Leagues => Set<League>();
 
+    public DbSet<Season> Seasons => Set<Season>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LeagueManagerDbContext).Assembly);
