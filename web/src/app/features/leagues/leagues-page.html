@@ -1,0 +1,35 @@
+<h1>Leagues</h1>
+
+<form [formGroup]="form" (ngSubmit)="createLeague()">
+  <label for="league-name">League name</label>
+  <input id="league-name" type="text" formControlName="name" />
+  @if (form.controls.name.touched && form.controls.name.errors; as errors) {
+    <p>
+      @if (errors['blank']) {
+        League name is required.
+      } @else if (errors['maxlength']) {
+        League name must be 100 characters or fewer.
+      }
+    </p>
+  }
+  <button type="submit">Create</button>
+  @if (createError(); as message) {
+    <p role="alert">{{ message }}</p>
+  }
+</form>
+
+@if (loadError(); as message) {
+    <p role="alert">{{ message }}</p>
+}
+
+@if (leagues(); as leagueList) {
+  @if (leagueList.length === 0) {
+    <p>No leagues yet.</p>
+  } @else {
+    <ul>
+      @for (league of leagueList; track league.id) {
+        <li>{{ league.name }}</li>
+      }
+    </ul>
+  }
+}
