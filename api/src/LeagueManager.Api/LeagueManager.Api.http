@@ -54,3 +54,6 @@ GET {{hostAddress}}/api/v1/leagues/99999
 
 # Id that isn't a number
 GET {{hostAddress}}/api/v1/leagues/abc
+
+### List all leagues (expect 200, sorted by name A to Z)
+GET {{hostAddress}}/api/v1/leagues

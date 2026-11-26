@@ -63,4 +63,12 @@ public class LeagueService : ILeagueService
 
         return new LeagueResponse(league.Id, league.Name);
     }
+
+    public async Task<IReadOnlyList<LeagueResponse>> GetLeaguesAsync(CancellationToken cancellationToken)
+    {
+        return await _db.Leagues
+            .OrderBy(league => league.Name)
+            .Select(league => new LeagueResponse(league.Id, league.Name))
+            .ToListAsync(cancellationToken);
+    }
 }
