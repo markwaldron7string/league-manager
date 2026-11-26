@@ -202,4 +202,32 @@ public class LeaguesControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         Assert.NotNull(leagues);
         Assert.Empty(leagues);
     }
+
+    [Fact]
+    public async Task GetLeagues_MultipleLeagues_Returns200SortedByName()
+    {
+        // Arrange
+        var names = new[] { "Cedar League", "adams league", "Bay League" };
+        foreach (var name in names)
+        {
+            var createResponse = await _client.PostAsJsonAsync(
+                "/api/v1/leagues",
+                new CreateLeagueRequest(name));
+
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        }
+
+        // Act
+        var response = await _client.GetAsync("/api/v1/leagues");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var leagues = await response.Content.ReadFromJsonAsync<List<LeagueResponse>>();
+        Assert.NotNull(leagues);
+
+        var expectedNames = new[] { "adams league", "Bay League", "Cedar League" };
+        Assert.Equal(expectedNames, leagues.Select(league => league.Name));
+        Assert.All(leagues, league => Assert.InRange(league.Id, 1, int.MaxValue));
+    }
 }
