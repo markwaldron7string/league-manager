@@ -46,4 +46,24 @@ describe('LeaguesPage', () => {
     expect(page.textContent).toContain('No leagues yet.');
     expect(page.querySelector('ul')).toBeNull();
   });
+
+    it('has a form with a name field and a Create button', async () => {
+    // Act
+    const page = await renderPage([]);
+
+    // Assert
+    const label = Array.from(page.querySelectorAll('label')).find(
+      (item) => item.textContent?.trim() === 'League name',
+    );
+    expect(label).toBeDefined();
+
+    const nameField = page.querySelector(`#${label?.htmlFor}`);
+    expect(nameField?.tagName).toBe('INPUT');
+    expect(nameField?.closest('form')).not.toBeNull();
+
+    const createButton = Array.from(page.querySelectorAll('button')).find(
+      (item) => item.textContent?.trim() === 'Create',
+    );
+    expect(createButton?.type).toBe('submit');
+  });
 });
