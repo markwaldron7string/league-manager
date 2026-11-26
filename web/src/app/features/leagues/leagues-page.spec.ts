@@ -1,5 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { League } from './league';
@@ -137,5 +138,41 @@ describe('LeaguesPage', () => {
     // Assert
     expect(page.textContent).toContain(message);
     expect(createLeague).not.toHaveBeenCalled();
+  });
+
+    it('shows the error message from the API when the name is already taken', async () => {
+    // Arrange
+    const detail = 'A league named "Cedar League" already exists.';
+    const createLeague = vi.fn().mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            statusText: 'Conflict',
+            error: { title: 'Conflict', status: 409, detail },
+          }),
+      ),
+    );
+
+    const fixture = await renderPage({ getLeagues: () => of([]), createLeague });
+    const page: HTMLElement = fixture.nativeElement;
+
+    const nameField = page.querySelector<HTMLInputElement>('#league-name');
+    if (!nameField) {
+      throw new Error('The name field was not found.');
+    }
+
+    // Act
+    nameField.value = 'Cedar League';
+    nameField.dispatchEvent(new Event('input'));
+    findButton(page, 'Create').click();
+    await fixture.whenStable();
+
+    // Assert
+    expect(createLeague).toHaveBeenCalledWith({ name: 'Cedar League' });
+
+    const alert = page.querySelector('[role="alert"]');
+    expect(alert?.textContent?.trim()).toBe(detail);
+    expect(nameField.value).toBe('Cedar League');
   });
 });
