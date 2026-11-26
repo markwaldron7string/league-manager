@@ -1,5 +1,11 @@
 <h1>Leagues</h1>
 
+<form [formGroup]="form">
+  <label for="league-name">League name</label>
+  <input id="league-name" type="text" formControlName="name" />
+  <button type="submit">Create</button>
+</form>
+
 @if (leagues(); as leagueList) {
   @if (leagueList.length === 0) {
     <p>No leagues yet.</p>
