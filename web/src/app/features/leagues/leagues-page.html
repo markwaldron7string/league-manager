@@ -1,1 +1,13 @@
 <h1>Leagues</h1>
+
+@if (leagues(); as leagueList) {
+  @if (leagueList.length === 0) {
+    <p>No leagues yet.</p>
+  } @else {
+    <ul>
+      @for (league of leagueList; track league.id) {
+        <li>{{ league.name }}</li>
+      }
+    </ul>
+  }
+}
