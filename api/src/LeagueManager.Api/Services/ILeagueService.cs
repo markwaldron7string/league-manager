@@ -6,4 +6,5 @@ public interface ILeagueService
 {
     Task<LeagueResponse> CreateLeagueAsync(CreateLeagueRequest request, CancellationToken cancellationToken);
     Task<LeagueResponse> GetLeagueByIdAsync(int id, CancellationToken cancellationToken);
+    Task<IReadOnlyList<LeagueResponse>> GetLeaguesAsync(CancellationToken cancellationToken);
 }

@@ -15,6 +15,15 @@ public class LeaguesController : ControllerBase
         _leagueService = leagueService;
     }
 
+    [HttpGet]
+    [ProducesResponseType<IReadOnlyList<LeagueResponse>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<LeagueResponse>>> GetLeagues(
+        CancellationToken cancellationToken)
+    {
+        var leagues = await _leagueService.GetLeaguesAsync(cancellationToken);
+        return Ok(leagues);
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType<LeagueResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
