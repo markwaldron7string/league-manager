@@ -6,34 +6,44 @@ import { LeagueApi } from './league-api';
 import { LeaguesPage } from './leagues-page';
 
 describe('LeaguesPage', () => {
-  const leagues: League[] = [
-    { id: 2, name: 'adams league' },
-    { id: 3, name: 'Bay League' },
-    { id: 1, name: 'Cedar League' },
-  ];
-
-  beforeEach(async () => {
+  async function renderPage(leagues: League[]): Promise<HTMLElement> {
     const fakeLeagueApi: Partial<LeagueApi> = {
       getLeagues: () => of(leagues),
     };
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       imports: [LeaguesPage],
       providers: [{ provide: LeagueApi, useValue: fakeLeagueApi }],
-    }).compileComponents();
-  });
+    });
+
+    const fixture = TestBed.createComponent(LeaguesPage);
+    await fixture.whenStable();
+
+    return fixture.nativeElement;
+  }
 
   it('shows every league name in the order the API sends them', async () => {
     // Arrange
-    const fixture = TestBed.createComponent(LeaguesPage);
+    const leagues: League[] = [
+      { id: 2, name: 'adams league' },
+      { id: 3, name: 'Bay League' },
+      { id: 1, name: 'Cedar League' },
+    ];
 
     // Act
-    await fixture.whenStable();
+    const page = await renderPage(leagues);
 
     // Assert
-    const page: HTMLElement = fixture.nativeElement;
     const names = Array.from(page.querySelectorAll('li')).map((item) => item.textContent?.trim());
-
     expect(names).toEqual(['adams league', 'Bay League', 'Cedar League']);
+  });
+
+  it('shows "No leagues yet." when there are no leagues', async () => {
+    // Act
+    const page = await renderPage([]);
+
+    // Assert
+    expect(page.textContent).toContain('No leagues yet.');
+    expect(page.querySelector('ul')).toBeNull();
   });
 });
