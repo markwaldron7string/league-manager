@@ -1,6 +1,6 @@
 # League Manager Style Guide
 
-Version 1.2. "League Manager" is a placeholder name until the project has a real one.
+Version 1.3. "League Manager" is a placeholder name until the project has a real one.
 
 ## 1. About this guide
 
@@ -26,7 +26,7 @@ league-manager/
       LeagueManager.Api.UnitTests/
       LeagueManager.Api.IntegrationTests/
       LeagueManager.Api.TestData/   Shared test data builders (fake data only)
-  web/                          Angular admin site (Later)
+  web/                          Angular admin site (see section 8)
   scheduler/                    Java schedule generator (Later)
   mobile/                       Coach's sideline app (Later)
   docs/
@@ -179,7 +179,7 @@ The goal: if a test suite is green, I trust the code. If I can't trust a green r
 | Coverlet | Measures code coverage |
 | `FakeTimeProvider` | Lets tests set and move the clock |
 | Stryker.NET | Mutation testing (checks whether my tests actually catch bugs) |
-| Vitest | Angular tests (Later) |
+| Vitest | Angular tests |
 
 ### What gets tested
 
@@ -264,11 +264,83 @@ GitHub Actions runs these on every pull request. All must pass to merge:
 - Acceptance criteria are written so each one can be turned into a test (specific inputs and expected results, not "works well")
 - At the end of each sprint, a few lines of notes: what got done, what didn't, what I'd change, and the mutation score
 
+### Angular admin site
+
+#### Basics
+
+- Angular 22, standalone components (the default), SCSS, no server-side rendering
+- Node 24 (long-term support), matching CI
+- Run `npm test -- --watch=false` and `npm run build` before every commit
+
+#### Folder layout
+
+Organized by feature, not by type of file:
+
+```
+web/src/app/
+  features/
+    leagues/
+      leagues-page.ts         The page component
+      leagues-page.html
+      leagues-page.scss
+      leagues-page.spec.ts
+      league-api.ts           Service that calls the API
+      league-api.spec.ts
+      league.ts               Types that match the API's DTOs
+  app.ts
+  app.routes.ts
+  app.config.ts
+```
+
+- Each feature gets a folder under `features/`
+- Code shared by more than one feature goes in `shared/` once it exists. Nothing moves there until a second feature needs it.
+
+#### Naming
+
+| Thing | Style | Example |
+|---|---|---|
+| Files | kebab-case, no type suffix (CLI default) | `leagues-page.ts`, `league-api.ts` |
+| Classes | PascalCase, matching the file name | `LeaguesPage`, `LeagueApi` |
+| Routed page components | End in `Page` | `LeaguesPage` |
+| Services | Named for their job | `LeagueApi` |
+| Types for API data | Match the C# DTO names, no I prefix | `League`, `CreateLeagueRequest` |
+| Test files | Same name plus `.spec.ts`, next to the file | `league-api.spec.ts` |
+
+#### Layers
+
+Requests flow one way: **Component → Service → API**
+
+- **Components** show data and handle user input. They never call `HttpClient`.
+- **Services** call the API with `HttpClient` and return its data. One service per API resource.
+- The API's base address comes from config, never typed into a service.
+
+#### State
+
+- Components keep their state in signals
+- No state library (like NgRx) until a real need shows up
+
+#### Templates
+
+- Use the built-in control flow (`@if`, `@for` with `track`)
+- Forms use Reactive Forms, with the same rules as the API's DTOs (like max length 100)
+
+#### Errors
+
+- API errors come back as ProblemDetails. Show the `detail` message to the user when there is one, and a general message when there isn't.
+
+#### Testing
+
+- Vitest, run through `ng test`
+- Every acceptance criterion gets at least one test
+- Tests never call the real API. Services are tested with `HttpTestingController`, and components get a fake service.
+- Tests find elements by what the user sees (text, labels, buttons), not by CSS classes
+- `describe` names the thing being tested; `it` describes the behavior in plain words
+  Example: `it('shows "No leagues yet." when there are no leagues')`
+
 ## 8. Later sections
 
 Filled in when I reach that part of the project.
 
-- **Angular admin site**: folder structure, component and service naming, state handling, Vitest setup
 - **Java scheduler**: build tool, project structure, how the C# API calls it, JUnit testing, contract tests so the C# API and Java service agree on request and response shapes
 - **Mobile app**: Swift or Kotlin, how it talks to the API, offline score entry
 - **AWS**: which services, how deployment works, where secrets live
