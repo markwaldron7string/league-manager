@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { League } from './league';
+import { CreateLeagueRequest, League } from './league';
 
 @Injectable({ providedIn: 'root' })
 export class LeagueApi {
@@ -12,5 +12,9 @@ export class LeagueApi {
 
   getLeagues(): Observable<League[]> {
     return this.http.get<League[]>(this.baseUrl);
+  }
+
+  createLeague(request: CreateLeagueRequest): Observable<League> {
+    return this.http.post<League>(this.baseUrl, request);
   }
 }
