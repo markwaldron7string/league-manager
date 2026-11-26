@@ -8,11 +8,17 @@ import {
   Validators,
 } from '@angular/forms';
 
+import { HttpErrorResponse } from '@angular/common/http';
 import { CreateLeagueRequest, League } from './league';
 import { LeagueApi } from './league-api';
 
 function notBlank(control: AbstractControl<string>): ValidationErrors | null {
   return control.value.trim().length === 0 ? { blank: true } : null;
+}
+
+function problemDetail(error: HttpErrorResponse): string | undefined {
+  const detail: unknown = error.error?.detail;
+  return typeof detail === 'string' ? detail : undefined;
 }
 
 @Component({
@@ -26,8 +32,10 @@ export class LeaguesPage implements OnInit {
 
   protected readonly leagues = signal<League[] | undefined>(undefined);
 
+  protected readonly createError = signal<string | undefined>(undefined);
+
   protected readonly form = new FormGroup({
-    name: new FormControl('', { 
+    name: new FormControl('', {
       nonNullable: true,
       validators: [notBlank, Validators.maxLength(100)],
     }),
@@ -42,11 +50,18 @@ export class LeaguesPage implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const request: CreateLeagueRequest = this.form.getRawValue();
 
-    this.leagueApi.createLeague(request).subscribe(() => {
-      this.form.reset();
-      this.loadLeagues();
+    const request: CreateLeagueRequest = this.form.getRawValue();
+    this.createError.set(undefined);
+
+    this.leagueApi.createLeague(request).subscribe({
+      next: () => {
+        this.form.reset();
+        this.loadLeagues();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.createError.set(problemDetail(error) ?? 'The league could not be created.');
+      },
     });
   }
 

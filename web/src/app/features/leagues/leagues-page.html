@@ -13,6 +13,9 @@
     </p>
   }
   <button type="submit">Create</button>
+  @if (createError(); as message) {
+    <p role="alert">{{ message }}</p>
+  }
 </form>
 
 @if (leagues(); as leagueList) {
