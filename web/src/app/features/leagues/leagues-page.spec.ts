@@ -112,4 +112,30 @@ describe('LeaguesPage', () => {
     expect(names).toEqual(['Cedar League']);
     expect(nameField.value).toBe('');
   });
+
+    it.each([
+    { name: '', message: 'League name is required.' },
+    { name: '   ', message: 'League name is required.' },
+    { name: 'a'.repeat(101), message: 'League name must be 100 characters or fewer.' },
+  ])('shows "$message" and sends no request for an invalid name', async ({ name, message }) => {
+    // Arrange
+    const createLeague = vi.fn();
+    const fixture = await renderPage({ getLeagues: () => of([]), createLeague });
+    const page: HTMLElement = fixture.nativeElement;
+
+    const nameField = page.querySelector<HTMLInputElement>('#league-name');
+    if (!nameField) {
+      throw new Error('The name field was not found.');
+    }
+
+    // Act
+    nameField.value = name;
+    nameField.dispatchEvent(new Event('input'));
+    findButton(page, 'Create').click();
+    await fixture.whenStable();
+
+    // Assert
+    expect(page.textContent).toContain(message);
+    expect(createLeague).not.toHaveBeenCalled();
+  });
 });
