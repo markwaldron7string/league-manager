@@ -264,6 +264,15 @@ GitHub Actions runs these on every pull request. All must pass to merge:
 - Acceptance criteria are written so each one can be turned into a test (specific inputs and expected results, not "works well")
 - At the end of each sprint, a few lines of notes: what got done, what didn't, what I'd change, and the mutation score
 
+## 8. Later sections
+
+Filled in when I reach that part of the project.
+
+- **Java scheduler**: build tool, project structure, how the C# API calls it, JUnit testing, contract tests so the C# API and Java service agree on request and response shapes
+- **Mobile app**: Swift or Kotlin, how it talks to the API, offline score entry
+- **AWS**: which services, how deployment works, where secrets live
+- **Splunk / monitoring**: what gets logged, dashboards, alerts
+
 ### Angular admin site
 
 #### Basics
@@ -336,15 +345,6 @@ Requests flow one way: **Component → Service → API**
 - Tests find elements by what the user sees (text, labels, buttons), not by CSS classes
 - `describe` names the thing being tested; `it` describes the behavior in plain words
   Example: `it('shows "No leagues yet." when there are no leagues')`
-
-## 8. Later sections
-
-Filled in when I reach that part of the project.
-
-- **Java scheduler**: build tool, project structure, how the C# API calls it, JUnit testing, contract tests so the C# API and Java service agree on request and response shapes
-- **Mobile app**: Swift or Kotlin, how it talks to the API, offline score entry
-- **AWS**: which services, how deployment works, where secrets live
-- **Splunk / monitoring**: what gets logged, dashboards, alerts
 
 ## 9. Decision log
 
