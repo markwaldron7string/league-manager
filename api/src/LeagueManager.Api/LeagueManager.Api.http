@@ -57,3 +57,55 @@ GET {{hostAddress}}/api/v1/leagues/abc
 
 ### List all leagues (expect 200, sorted by name A to Z)
 GET {{hostAddress}}/api/v1/leagues
+
+### Seasons: league to use (any existing league id from GET /api/v1/leagues)
+@leagueId = 1
+
+### Create a season (expect 201). Change the name each time, league-sql keeps its data.
+POST {{hostAddress}}/api/v1/leagues/{{leagueId}}/seasons
+Content-Type: application/json
+
+{
+  "name": "Spring 2027",
+  "startDate": "2027-03-01",
+  "endDate": "2027-06-30"
+}
+
+### Duplicate season name, different case (expect 409)
+POST {{hostAddress}}/api/v1/leagues/{{leagueId}}/seasons
+Content-Type: application/json
+
+{
+  "name": "spring 2027",
+  "startDate": "2027-03-01",
+  "endDate": "2027-06-30"
+}
+
+### End date before start date (expect 400 with an EndDate error)
+POST {{hostAddress}}/api/v1/leagues/{{leagueId}}/seasons
+Content-Type: application/json
+
+{
+  "name": "Backwards Season",
+  "startDate": "2027-06-30",
+  "endDate": "2027-03-01"
+}
+
+### Missing start date (expect 400 with a StartDate error)
+POST {{hostAddress}}/api/v1/leagues/{{leagueId}}/seasons
+Content-Type: application/json
+
+{
+  "name": "No Start Season",
+  "endDate": "2027-06-30"
+}
+
+### League that doesn't exist (expect 404)
+POST {{hostAddress}}/api/v1/leagues/99999/seasons
+Content-Type: application/json
+
+{
+  "name": "Lost Season",
+  "startDate": "2027-03-01",
+  "endDate": "2027-06-30"
+}
