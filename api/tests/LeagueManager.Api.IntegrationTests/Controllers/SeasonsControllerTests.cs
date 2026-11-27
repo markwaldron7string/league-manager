@@ -46,6 +46,29 @@ public class SeasonsControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         Assert.Equal(endDate, season.EndDate);
     }
 
+    [Fact]
+    public async Task CreateSeason_LeagueNotFound_Returns404()
+    {
+        // Arrange
+        var missingLeagueId = 99999;
+        var request = new CreateSeasonRequest(
+            "Spring Season",
+            new DateOnly(2027, 3, 1),
+            new DateOnly(2027, 6, 30));
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/leagues/{missingLeagueId}/seasons",
+            request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal($"League {missingLeagueId} was not found.", problem.Detail);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
@@ -80,6 +103,29 @@ public class SeasonsControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         var league = await CreateLeagueAsync("Test League");
         var request = new CreateSeasonRequest(
             " ",
+            new DateOnly(2027, 3, 1),
+            new DateOnly(2027, 6, 30));
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/leagues/{league.Id}/seasons",
+            request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Contains("Name", problem.Errors.Keys);
+    }
+
+    [Fact]
+    public async Task CreateSeason_MissingName_Returns400()
+    {
+        // Arrange
+        var league = await CreateLeagueAsync("Test League");
+        var request = new CreateSeasonRequest(
+            null!,
             new DateOnly(2027, 3, 1),
             new DateOnly(2027, 6, 30));
 
