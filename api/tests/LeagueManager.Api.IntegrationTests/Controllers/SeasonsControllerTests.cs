@@ -70,6 +70,54 @@ public class SeasonsControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
     }
 
     [Theory]
+    [InlineData("Spring 2027")]
+    [InlineData("spring 2027")]
+    public async Task CreateSeason_DuplicateNameInSameLeague_Returns409(string duplicateName)
+    {
+        // Arrange
+        var league = await CreateLeagueAsync("Test League");
+        await CreateSeasonAsync(league.Id, "Spring 2027");
+        var request = new CreateSeasonRequest(
+            duplicateName,
+            new DateOnly(2027, 3, 1),
+            new DateOnly(2027, 6, 30));
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/leagues/{league.Id}/seasons",
+            request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateSeason_SameNameInDifferentLeague_Returns201()
+    {
+        // Arrange
+        var firstLeague = await CreateLeagueAsync("First League");
+        var secondLeague = await CreateLeagueAsync("Second League");
+        await CreateSeasonAsync(firstLeague.Id, "Spring 2027");
+
+        var request = new CreateSeasonRequest(
+            "Spring 2027",
+            new DateOnly(2027, 3, 1),
+            new DateOnly(2027, 6, 30));
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/leagues/{secondLeague.Id}/seasons",
+            request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var season = await response.Content.ReadFromJsonAsync<SeasonResponse>();
+        Assert.NotNull(season);
+        Assert.Equal(secondLeague.Id, season.LeagueId);
+    }
+
+    [Theory]
     [InlineData(0)]
     [InlineData(-1)]
     public async Task CreateSeason_EndDateNotAfterStartDate_Returns400(int daysAfterStart)
@@ -201,5 +249,21 @@ public class SeasonsControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         var league = await response.Content.ReadFromJsonAsync<LeagueResponse>();
         Assert.NotNull(league);
         return league;
+    }
+
+    private async Task<SeasonResponse> CreateSeasonAsync(int leagueId, string name)
+    {
+        var request = new CreateSeasonRequest(
+            name,
+            new DateOnly(2027, 3, 1),
+            new DateOnly(2027, 6, 30));
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/leagues/{leagueId}/seasons",
+            request);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var season = await response.Content.ReadFromJsonAsync<SeasonResponse>();
+        Assert.NotNull(season);
+        return season;
     }
 }
