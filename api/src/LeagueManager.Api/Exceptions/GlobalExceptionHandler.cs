@@ -35,6 +35,11 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Title = "Not Found",
                 Detail = notFound.Message,
             },
+            BusinessRuleException rule => new HttpValidationProblemDetails(
+                new Dictionary<string, string[]> { [rule.Field] = [rule.Message] })
+            {
+                Status = StatusCodes.Status400BadRequest,
+            },
             _ => new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,

@@ -19,6 +19,7 @@ builder.Services.AddDbContext<LeagueManagerDbContext>(options =>
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ILeagueService, LeagueService>();
+builder.Services.AddScoped<ISeasonService, SeasonService>();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
