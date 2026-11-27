@@ -32,6 +32,13 @@ public class SeasonService : ISeasonService
         var endDate = request.EndDate
             ?? throw new ArgumentException("EndDate is required.", nameof(request));
 
+        if (endDate <= startDate)
+        {
+            throw new BusinessRuleException(
+                nameof(CreateSeasonRequest.EndDate),
+                "End date must be after the start date.");
+        }
+
         var leagueExists = await _db.Leagues
             .AnyAsync(league => league.Id == leagueId, cancellationToken);
 
