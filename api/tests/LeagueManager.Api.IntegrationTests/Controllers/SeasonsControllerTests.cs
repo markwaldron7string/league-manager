@@ -26,13 +26,7 @@ public class SeasonsControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
     public async Task CreateSeason_EndDateNotAfterStartDate_Returns400(int daysAfterStart)
     {
         // Arrange
-        var leagueResponse = await _client.PostAsJsonAsync(
-            "/api/v1/leagues",
-            new CreateLeagueRequest("Test League"));
-        Assert.Equal(HttpStatusCode.Created, leagueResponse.StatusCode);
-
-        var league = await leagueResponse.Content.ReadFromJsonAsync<LeagueResponse>();
-        Assert.NotNull(league);
+        var league = await CreateLeagueAsync("Test League");
 
         var startDate = new DateOnly(2026, 1, 1);
         var request = new CreateSeasonRequest(
@@ -51,5 +45,43 @@ public class SeasonsControllerTests : IClassFixture<LeagueManagerApiFactory>, IA
         var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         Assert.NotNull(problem);
         Assert.Contains("EndDate", problem.Errors.Keys);
+    }
+
+    [Fact]
+    public async Task CreateSeason_ValidRequest_Returns201WithSeason()
+    {
+        // Arrange
+        var league = await CreateLeagueAsync("Test League");
+        var startDate = new DateOnly(2027, 3, 1);
+        var endDate = new DateOnly(2027, 6, 30);
+        var request = new CreateSeasonRequest("Spring Season", startDate, endDate);
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/leagues/{league.Id}/seasons",
+            request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var season = await response.Content.ReadFromJsonAsync<SeasonResponse>();
+        Assert.NotNull(season);
+        Assert.InRange(season.Id, 1, int.MaxValue);
+        Assert.Equal(league.Id, season.LeagueId);
+        Assert.Equal(request.Name, season.Name);
+        Assert.Equal(startDate, season.StartDate);
+        Assert.Equal(endDate, season.EndDate);
+    }
+
+    private async Task<LeagueResponse> CreateLeagueAsync(string name)
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/api/v1/leagues",
+            new CreateLeagueRequest(name));
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var league = await response.Content.ReadFromJsonAsync<LeagueResponse>();
+        Assert.NotNull(league);
+        return league;
     }
 }
